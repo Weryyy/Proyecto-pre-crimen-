@@ -16,9 +16,11 @@ up: ## Iniciar todos los servicios
 	@echo "✓ Servicios iniciados!"
 	@echo ""
 	@echo "Acceso a los servicios:"
-	@echo "  • Neo4j Browser:    http://localhost:7474"
-	@echo "  • Visualización 3D: http://localhost:8050"
-	@echo "  • Jupyter Notebook: http://localhost:8888"
+	@echo "  • Neo4j Browser:         http://localhost:7474"
+	@echo "  • Visualización 3D:      http://localhost:8050"
+	@echo "  • 🆕 Panel Dashboard:    http://localhost:5006"
+	@echo "  • 🆕 Integrated Dashboard: http://localhost:5007"
+	@echo "  • Jupyter Notebook:      http://localhost:8888"
 	@echo ""
 	@echo "Credenciales Neo4j:"
 	@echo "  Usuario: neo4j"
@@ -83,3 +85,26 @@ status: ## Ver estado de los servicios
 
 shell: ## Shell en el contenedor de la aplicación
 	docker-compose run --rm app /bin/bash
+
+# 🆕 New HoloViz Dashboard Commands
+
+dashboard-menu: ## Menú interactivo de dashboards
+	python launch_dashboard.py
+
+dashboard-plotly: ## Dashboard 3D original (Plotly)
+	python visualization/dashboard.py
+
+dashboard-panel: ## Panel HoloViz dashboard
+	python visualization/panel_dashboard.py
+
+dashboard-integrated: ## Dashboard integrado (recomendado)
+	python visualization/integrated_dashboard.py
+
+dashboard-mapbox: ## Test de Mapbox (genera HTML)
+	python visualization/mapbox.py
+
+install-deps: ## Instalar dependencias de Python
+	pip install -r requirements.txt
+
+duckdb-analysis: ## Análisis con DuckDB
+	python examples/duckdb_analysis.py
