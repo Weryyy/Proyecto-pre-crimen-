@@ -48,6 +48,10 @@ data/
 # Jupyter Notebook
 .ipynb_checkpoints
 
+# Examples output
+examples/*.png
+examples/*.jpg
+
 # OS
 .DS_Store
 Thumbs.db
