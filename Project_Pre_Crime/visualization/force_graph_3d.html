@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pre-Crime 3D Force Graph - GNN Visualization</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a0a;
+            color: #ffffff;
+            overflow: hidden;
+        }
+
+        #graph-container {
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #controls {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(20, 20, 20, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            max-width: 300px;
+            backdrop-filter: blur(10px);
+        }
+
+        #stats {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(20, 20, 20, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            backdrop-filter: blur(10px);
+        }
+
+        #info-panel {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(20, 20, 20, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            max-width: 350px;
+            backdrop-filter: blur(10px);
+            display: none;
+        }
+
+        h2 {
+            margin: 0 0 15px 0;
+            color: #ff4444;
+            font-size: 18px;
+        }
+
+        h3 {
+            margin: 10px 0 5px 0;
+            color: #ff6666;
+            font-size: 14px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 5px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 3px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            background: #ff4444;
+            border: none;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        button:hover {
+            background: #ff6666;
+        }
+
+        button.secondary {
+            background: #444;
+        }
+
+        button.secondary:hover {
+            background: #666;
+        }
+
+        .stat-item {
+            margin: 8px 0;
+            font-size: 13px;
+        }
+
+        .stat-label {
+            color: #888;
+        }
+
+        .stat-value {
+            color: #ff4444;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .legend {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #333;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin: 5px 0;
+            font-size: 12px;
+        }
+
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            color: #ff4444;
+        }
+
+        .node-info {
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .node-info strong {
+            color: #ff4444;
+        }
+
+        #search-box {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: #fff;
+            border-radius: 3px;
+            font-size: 12px;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            margin: 8px 0;
+            cursor: pointer;
+        }
+
+        .checkbox-label input {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading" class="loading">
+        Loading graph data...
+    </div>
+
+    <div id="graph-container"></div>
+
+    <div id="controls">
+        <h2>🎯 Controls</h2>
+        
+        <input type="text" id="search-box" placeholder="Search by name or ID..." />
+        
+        <div class="control-group">
+            <label>Node Limit: <span id="limit-value">200</span></label>
+            <input type="range" id="limit-slider" min="50" max="500" value="200" step="50" />
+        </div>
+
+        <div class="control-group">
+            <label>Min Risk Filter: <span id="risk-value">0.0</span></label>
+            <input type="range" id="risk-slider" min="0" max="1" value="0" step="0.1" />
+        </div>
+
+        <div class="control-group">
+            <label class="checkbox-label">
+                <input type="checkbox" id="show-links" checked />
+                Show Connections
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" id="show-labels" checked />
+                Show Labels
+            </label>
+            <label class="checkbox-label">
+                <input type="checkbox" id="highlight-high-risk" />
+                Highlight High Risk Only
+            </label>
+        </div>
+
+        <button id="reload-btn">🔄 Reload Data</button>
+        <button id="center-btn" class="secondary">📍 Center View</button>
+        <button id="reset-btn" class="secondary">↻ Reset Filters</button>
+
+        <div class="legend">
+            <h3>Risk Levels</h3>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #00ff00;"></div>
+                <span>Low (&lt; 0.3)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ffff00;"></div>
+                <span>Medium (0.3-0.5)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ffa500;"></div>
+                <span>High (0.5-0.7)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #ff0000;"></div>
+                <span>Very High (&gt; 0.7)</span>
+            </div>
+        </div>
+    </div>
+
+    <div id="stats">
+        <h2>📊 Statistics</h2>
+        <div class="stat-item">
+            <span class="stat-label">Total Nodes:</span>
+            <span class="stat-value" id="stat-nodes">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Total Links:</span>
+            <span class="stat-value" id="stat-links">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">High Risk:</span>
+            <span class="stat-value" id="stat-high-risk">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Avg Risk:</span>
+            <span class="stat-value" id="stat-avg-risk">-</span>
+        </div>
+        <div class="stat-item">
+            <span class="stat-label">Max Risk:</span>
+            <span class="stat-value" id="stat-max-risk">-</span>
+        </div>
+    </div>
+
+    <div id="info-panel">
+        <h2>Selected Node</h2>
+        <div id="node-details" class="node-info"></div>
+    </div>
+
+    <!-- Load 3D Force Graph library from CDN -->
+    <script src="https://unpkg.com/3d-force-graph"></script>
+    <script src="https://unpkg.com/three"></script>
+
+    <script>
+        // Configuration
+        const API_BASE_URL = window.location.origin;
+        let currentData = null;
+        let graph = null;
+
+        // Initialize 3D Force Graph
+        function initGraph() {
+            const container = document.getElementById('graph-container');
+            
+            graph = ForceGraph3D()(container)
+                .backgroundColor('#0a0a0a')
+                .nodeLabel(node => `
+                    <div style="background: rgba(0,0,0,0.9); padding: 10px; border-radius: 5px; max-width: 250px;">
+                        <strong style="color: #ff4444;">${node.name}</strong><br/>
+                        Risk: <span style="color: ${node.color};">${node.risk_score}</span><br/>
+                        Age: ${node.age}<br/>
+                        Occupation: ${node.occupation}
+                    </div>
+                `)
+                .nodeColor(node => node.color)
+                .nodeVal(node => node.size || 10)
+                .nodeOpacity(0.9)
+                .linkColor(() => 'rgba(100, 100, 100, 0.2)')
+                .linkWidth(link => (link.strength || 1) * 0.5)
+                .linkOpacity(0.3)
+                .linkDirectionalParticles(2)
+                .linkDirectionalParticleSpeed(0.005)
+                .linkDirectionalParticleWidth(1.5)
+                .onNodeClick(node => {
+                    showNodeInfo(node);
+                    // Zoom to node
+                    const distance = 200;
+                    const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
+                    graph.cameraPosition(
+                        { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
+                        node,
+                        1000
+                    );
+                })
+                .d3Force('charge').strength(-120);
+
+            // Set initial camera position
+            graph.cameraPosition({ z: 1000 });
+
+            // Enable controls
+            graph.controls().enableDamping = true;
+            graph.controls().dampingFactor = 0.1;
+        }
+
+        // Fetch graph data from API
+        async function fetchGraphData(limit = 200, minRisk = 0) {
+            try {
+                document.getElementById('loading').style.display = 'block';
+                
+                let url = `${API_BASE_URL}/api/graph?limit=${limit}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                // Filter by minimum risk if needed
+                if (minRisk > 0) {
+                    data.nodes = data.nodes.filter(node => node.risk_score >= minRisk);
+                    const nodeIds = new Set(data.nodes.map(n => n.id));
+                    data.links = data.links.filter(link => 
+                        nodeIds.has(link.source) && nodeIds.has(link.target)
+                    );
+                }
+                
+                currentData = data;
+                updateStats(data);
+                updateGraph(data);
+                
+                document.getElementById('loading').style.display = 'none';
+                
+                return data;
+            } catch (error) {
+                console.error('Error fetching graph data:', error);
+                document.getElementById('loading').textContent = 'Error loading data. Please check if API is running.';
+            }
+        }
+
+        // Update graph visualization
+        function updateGraph(data) {
+            if (!graph) return;
+            
+            const showLinks = document.getElementById('show-links').checked;
+            const showLabels = document.getElementById('show-labels').checked;
+            const highlightHighRisk = document.getElementById('highlight-high-risk').checked;
+            
+            // Apply filters
+            let filteredData = JSON.parse(JSON.stringify(data));
+            
+            if (highlightHighRisk) {
+                filteredData.nodes = filteredData.nodes.filter(node => node.risk_score > 0.7);
+                const nodeIds = new Set(filteredData.nodes.map(n => n.id));
+                filteredData.links = filteredData.links.filter(link => 
+                    nodeIds.has(link.source) && nodeIds.has(link.target)
+                );
+            }
+            
+            // Update graph
+            graph.graphData(filteredData);
+            graph.linkVisibility(showLinks);
+            graph.nodeLabel(showLabels ? graph.nodeLabel() : null);
+        }
+
+        // Update statistics display
+        function updateStats(data) {
+            document.getElementById('stat-nodes').textContent = data.nodes.length;
+            document.getElementById('stat-links').textContent = data.links.length;
+            
+            const riskScores = data.nodes.map(n => n.risk_score);
+            const highRisk = riskScores.filter(r => r > 0.7).length;
+            const avgRisk = (riskScores.reduce((a, b) => a + b, 0) / riskScores.length).toFixed(3);
+            const maxRisk = Math.max(...riskScores).toFixed(3);
+            
+            document.getElementById('stat-high-risk').textContent = highRisk;
+            document.getElementById('stat-avg-risk').textContent = avgRisk;
+            document.getElementById('stat-max-risk').textContent = maxRisk;
+        }
+
+        // Show node information
+        function showNodeInfo(node) {
+            const panel = document.getElementById('info-panel');
+            const details = document.getElementById('node-details');
+            
+            details.innerHTML = `
+                <strong>ID:</strong> ${node.id}<br/>
+                <strong>Name:</strong> ${node.name}<br/>
+                <strong>Risk Score:</strong> <span style="color: ${node.color};">${node.risk_score}</span><br/>
+                <strong>Age:</strong> ${node.age}<br/>
+                <strong>Occupation:</strong> ${node.occupation}<br/>
+                <strong>Type:</strong> ${node.type}
+            `;
+            
+            panel.style.display = 'block';
+        }
+
+        // Search functionality
+        function searchNodes(query) {
+            if (!currentData) return;
+            
+            query = query.toLowerCase();
+            const matchingNodes = currentData.nodes.filter(node => 
+                node.name.toLowerCase().includes(query) || 
+                node.id.toLowerCase().includes(query)
+            );
+            
+            if (matchingNodes.length > 0) {
+                const node = matchingNodes[0];
+                showNodeInfo(node);
+                
+                // Zoom to node
+                const distance = 200;
+                const distRatio = 1 + distance/Math.hypot(node.x, node.y, node.z);
+                graph.cameraPosition(
+                    { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
+                    node,
+                    1000
+                );
+            }
+        }
+
+        // Event Listeners
+        document.getElementById('limit-slider').addEventListener('input', (e) => {
+            document.getElementById('limit-value').textContent = e.target.value;
+        });
+
+        document.getElementById('risk-slider').addEventListener('input', (e) => {
+            document.getElementById('risk-value').textContent = parseFloat(e.target.value).toFixed(1);
+        });
+
+        document.getElementById('reload-btn').addEventListener('click', () => {
+            const limit = parseInt(document.getElementById('limit-slider').value);
+            const minRisk = parseFloat(document.getElementById('risk-slider').value);
+            fetchGraphData(limit, minRisk);
+        });
+
+        document.getElementById('center-btn').addEventListener('click', () => {
+            if (graph) {
+                graph.cameraPosition({ x: 0, y: 0, z: 1000 }, { x: 0, y: 0, z: 0 }, 1000);
+            }
+        });
+
+        document.getElementById('reset-btn').addEventListener('click', () => {
+            document.getElementById('limit-slider').value = 200;
+            document.getElementById('limit-value').textContent = '200';
+            document.getElementById('risk-slider').value = 0;
+            document.getElementById('risk-value').textContent = '0.0';
+            document.getElementById('show-links').checked = true;
+            document.getElementById('show-labels').checked = true;
+            document.getElementById('highlight-high-risk').checked = false;
+            fetchGraphData(200, 0);
+        });
+
+        document.getElementById('show-links').addEventListener('change', () => {
+            if (currentData) updateGraph(currentData);
+        });
+
+        document.getElementById('show-labels').addEventListener('change', () => {
+            if (currentData) updateGraph(currentData);
+        });
+
+        document.getElementById('highlight-high-risk').addEventListener('change', () => {
+            if (currentData) updateGraph(currentData);
+        });
+
+        document.getElementById('search-box').addEventListener('keyup', (e) => {
+            if (e.key === 'Enter') {
+                searchNodes(e.target.value);
+            }
+        });
+
+        // Initialize on page load
+        window.addEventListener('load', () => {
+            initGraph();
+            fetchGraphData(200, 0);
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            if (graph) {
+                graph.width(window.innerWidth);
+                graph.height(window.innerHeight);
+            }
+        });
+    </script>
+</body>
+</html>
