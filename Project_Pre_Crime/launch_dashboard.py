@@ -41,6 +41,14 @@ def launch_mapbox_test():
     from visualization.mapbox import main
     main()
 
+def launch_force_graph():
+    """Launch 3D Force Graph with FastAPI backend"""
+    print("🚀 Launching 3D Force Graph with FastAPI...")
+    print("   API: http://localhost:8001")
+    print("   Visualization: http://localhost:8001/visualization")
+    from visualization.api_server import main
+    main()
+
 def show_menu():
     """Show interactive menu"""
     print("=" * 80)
@@ -66,14 +74,21 @@ def show_menu():
     print("     • GeoViews geographic analysis")
     print("     • Port: 5007\n")
     
-    print("  4. Mapbox Test (Generate HTML)")
+    print("  4. 3D Force Graph (NEW - GNN Visualization)")
+    print("     • Three.js-based 3D force-directed graph")
+    print("     • Real-time physics simulation with d3-forces")
+    print("     • FastAPI backend serving Neo4j data")
+    print("     • Interactive node exploration")
+    print("     • Port: 8001\n")
+    
+    print("  5. Mapbox Test (Generate HTML)")
     print("     • Test Mapbox integration")
     print("     • Exports to HTML file\n")
     
-    print("  5. Exit\n")
+    print("  6. Exit\n")
     print("=" * 80)
     
-    choice = input("\nEnter your choice (1-5): ").strip()
+    choice = input("\nEnter your choice (1-6): ").strip()
     
     if choice == '1':
         launch_plotly_dashboard()
@@ -82,8 +97,10 @@ def show_menu():
     elif choice == '3':
         launch_integrated_dashboard()
     elif choice == '4':
-        launch_mapbox_test()
+        launch_force_graph()
     elif choice == '5':
+        launch_mapbox_test()
+    elif choice == '6':
         print("\n👋 Goodbye!")
         sys.exit(0)
     else:
@@ -101,6 +118,7 @@ Examples:
   python launch_dashboard.py --plotly           # Launch Plotly dashboard
   python launch_dashboard.py --panel            # Launch Panel dashboard
   python launch_dashboard.py --integrated       # Launch integrated dashboard
+  python launch_dashboard.py --force-graph      # Launch 3D Force Graph
   python launch_dashboard.py --mapbox           # Test Mapbox
   python launch_dashboard.py --all              # Show all options
         """
@@ -112,6 +130,8 @@ Examples:
                       help='Launch Panel HoloViz dashboard (port 5006)')
     parser.add_argument('--integrated', action='store_true',
                       help='Launch integrated dashboard (port 5007)')
+    parser.add_argument('--force-graph', action='store_true',
+                      help='Launch 3D Force Graph with FastAPI (port 8001)')
     parser.add_argument('--mapbox', action='store_true',
                       help='Test Mapbox visualization')
     parser.add_argument('--all', action='store_true',
@@ -138,7 +158,10 @@ Examples:
         print("\n3. Integrated Dashboard")
         print("   Command: python launch_dashboard.py --integrated")
         print("   URL: http://localhost:5007")
-        print("\n4. Mapbox Test")
+        print("\n4. 3D Force Graph (GNN Visualization)")
+        print("   Command: python launch_dashboard.py --force-graph")
+        print("   URL: http://localhost:8001/visualization")
+        print("\n5. Mapbox Test")
         print("   Command: python launch_dashboard.py --mapbox")
         print("=" * 80 + "\n")
         return
@@ -150,6 +173,8 @@ Examples:
         launch_panel_dashboard()
     elif args.integrated:
         launch_integrated_dashboard()
+    elif args.force_graph:
+        launch_force_graph()
     elif args.mapbox:
         launch_mapbox_test()
 

@@ -100,6 +100,9 @@ dashboard-panel: ## Panel HoloViz dashboard
 dashboard-integrated: ## Dashboard integrado (recomendado)
 	python visualization/integrated_dashboard.py
 
+dashboard-force-graph: ## 3D Force Graph con FastAPI (GNN visualization)
+	python visualization/api_server.py
+
 dashboard-mapbox: ## Test de Mapbox (genera HTML)
 	python visualization/mapbox.py
 
