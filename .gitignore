@@ -52,7 +52,18 @@ notebooks/*.ipynb
 # Examples output
 examples/*.png
 examples/*.jpg
+examples/*.html
 examples/examples/
+
+# HoloViz/Panel output
+*.html
+!Project_Pre_Crime/visualization/*.html
+
+# Parquet files
+*.parquet
+
+# DuckDB files
+*.duckdb
 
 # Docker volumes
 neo4j_data/
