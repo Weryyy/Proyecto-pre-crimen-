@@ -1,0 +1,56 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv
+ENV
+env
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# Neo4j
+neo4j_data
+*.db
+
+# Model checkpoints (build fresh)
+checkpoints/*.pth
+checkpoints/*.ckpt
+
+# Data
+data/*.csv
+
+# Jupyter
+.ipynb_checkpoints
+notebooks/*.ipynb
+
+# Examples output
+examples/*.png
+examples/*.jpg
+
+# Documentation
+*.md
+!README.md
+
+# Docker
+docker-compose.yml
+Dockerfile
+
+# OS
+.DS_Store
+Thumbs.db

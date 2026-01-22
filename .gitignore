@@ -47,10 +47,16 @@ data/
 
 # Jupyter Notebook
 .ipynb_checkpoints
+notebooks/*.ipynb
 
 # Examples output
 examples/*.png
 examples/*.jpg
+examples/examples/
+
+# Docker volumes
+neo4j_data/
+neo4j_logs/
 
 # OS
 .DS_Store

@@ -2,6 +2,20 @@
 
 A graph neural network-based system for predicting criminal behavior using Neo4j, GraphSAGE, and GAT (Graph Attention Networks).
 
+🐳 **Docker Ready**: Fully containerized setup for easy deployment anywhere!  
+📊 **3D Visualization**: Interactive browser-based 3D graph visualization!
+
+## Quick Start with Docker
+
+```bash
+# Setup completo en 3 comandos
+make build      # Construir contenedores
+make setup      # Configurar base de datos
+make visualize  # Ver visualización 3D en http://localhost:8050
+```
+
+Ver [DOCKER.md](DOCKER.md) para guía completa de Docker.
+
 ## Overview
 
 This project implements a pre-crime prediction system inspired by minority report concepts, using:
@@ -11,29 +25,50 @@ This project implements a pre-crime prediction system inspired by minority repor
 - **RedGAN** architecture combining generator and discriminator
 - **Beta distribution** for realistic risk seed evolution
 - **Faker** for synthetic data generation
+- **Docker** for containerized deployment
+- **Plotly Dash** for interactive 3D visualization
 
 ## Project Structure
 
 ```
 Project_Pre_Crime/
-├── requirements.txt          # Python dependencies
+├── Dockerfile              # Container definition
+├── docker-compose.yml      # Multi-container orchestration
+├── Makefile               # Convenient commands
+├── requirements.txt        # Python dependencies
 ├── scripts/
-│   └── setup_db.cypher      # Neo4j schema definition
-└── src/
-    ├── connector.py         # Neo4j interaction and data generation
-    ├── models.py            # GraphSAGE and GAT models (RedGAN)
-    └── train.py             # Training pipeline
+│   └── setup_db.cypher    # Neo4j schema definition
+├── src/
+│   ├── connector.py       # Neo4j interaction and data generation
+│   ├── models.py          # GraphSAGE and GAT models (RedGAN)
+│   └── train.py           # Training pipeline
+└── visualization/
+    └── dashboard.py       # 3D interactive dashboard
 ```
 
 ## Features
 
-### 1. Graph Database Schema
+### 1. Docker Containerization
+- **Fully containerized**: Run anywhere with Docker
+- **Docker Compose**: Neo4j + App + Jupyter in one command
+- **No manual setup**: Everything automated
+- **Persistent data**: Volumes for checkpoints and data
+
+### 2. 3D Interactive Visualization
+- **Browser-based**: View at http://localhost:8050
+- **Real-time 3D**: Rotate, zoom, explore the graph
+- **Multiple layouts**: t-SNE, PCA, Spring layout
+- **Color-coded risk**: Visual risk levels
+- **Red Balls highlight**: High-risk individuals clearly marked
+- **Interactive controls**: Adjust threshold, toggle edges
+
+### 3. Graph Database Schema
 - **Citizen nodes**: Individuals with risk scores
 - **Location nodes**: Places with crime rates
 - **INTERACTS_WITH relationships**: Social connections
 - **MOVES_TO relationships**: Location visits
 
-### 2. Risk Seed Evolution
+### 4. Risk Seed Evolution
 - Uses Beta distribution for realistic risk modeling
 - Evolves based on:
   - Social interactions
@@ -41,12 +76,12 @@ Project_Pre_Crime/
   - Time progression
   - Current risk level
 
-### 3. RedGAN Architecture
+### 5. RedGAN Architecture
 - **Generator (GraphSAGE)**: Creates node embeddings from graph structure
 - **Discriminator (GAT)**: Predicts crime risk using attention mechanisms
 - **Red Balls Detection**: Identifies high-risk individuals
 
-### 4. Synthetic Data Generation
+### 6. Synthetic Data Generation
 - Realistic citizen profiles using Faker
 - Location data with geographical coordinates
 - Social interaction networks
@@ -54,12 +89,39 @@ Project_Pre_Crime/
 
 ## Installation
 
-### Prerequisites
+### Option 1: Docker (Recommended) 🐳
+
+**Prerequisites**: Docker and Docker Compose installed
+
+```bash
+# Clone repository
+git clone <repo-url>
+cd Project_Pre_Crime
+
+# Quick start
+make demo
+
+# Or step by step
+make build      # Build containers
+make setup      # Setup database and generate data
+make visualize  # Start 3D visualization
+```
+
+Access services:
+- **3D Visualization**: http://localhost:8050
+- **Neo4j Browser**: http://localhost:7474 (neo4j/precrime2024)
+- **Jupyter**: http://localhost:8888
+
+See [DOCKER.md](DOCKER.md) for complete Docker guide.
+
+### Option 2: Manual Installation
+
+**Prerequisites**:
 - Python 3.8+
 - Neo4j 5.0+ database
 - CUDA (optional, for GPU training)
 
-### Setup
+**Setup**:
 
 1. Install Python dependencies:
 ```bash
